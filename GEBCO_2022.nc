@@ -1,0 +1,1 @@
+/g/data/ik11/inputs/GEBCO_2022/GEBCO_2022.nc
