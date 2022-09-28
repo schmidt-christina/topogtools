@@ -1,0 +1,1 @@
+/g/data/ik11/inputs/access-om2/input_20200530/mom_025deg/grid_spec.nc
