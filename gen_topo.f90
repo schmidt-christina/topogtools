@@ -6,7 +6,7 @@ program load_mosaic
 !
 ! Usage: load_mosaic
 !
-! Assumes there's a file 'mosaic.nc' lurking about....
+! Assumes there's a file 'grid_spec.nc' lurking about....
 !
 ! Output. A file called ...
 !
@@ -41,7 +41,7 @@ character(len=256)  :: dirfile=''        ! concatenation
 character(len=256)  :: topo_file=''      ! 
 character(len=16)   :: xname,yname
 
-logical             :: fexist = .false., istripolar = .true.
+logical             :: fexist = .false., istripolar = .false.
 
 integer(int32)      :: x_cyc, j_lat
 real(real64)        :: x_shift
@@ -67,12 +67,12 @@ real(real64) ::yt_start,yt_delta
 
 write(*,*) 'Getting model grid info'
 ! Get mosaic info
-inquire(file=trim('mosaic.nc'),exist=fexist)
+inquire(file=trim('grid_spec.nc'),exist=fexist)
 if ( .not. fexist ) then
-   write(*,*) 'mosaic.nc does not exist. Bailing out' 
+   write(*,*) 'grid_spec.nc does not exist. Bailing out' 
    stop 1
 endif
-call handle_error(nf90_open('mosaic.nc',nf90_nowrite,ncid))
+call handle_error(nf90_open('grid_spec.nc',nf90_nowrite,ncid))
 call handle_error(nf90_inq_varid(ncid,'ocn_mosaic_dir',vid))
 call handle_error(nf90_get_var(ncid,vid,odir))
 call handle_error(nf90_inq_varid(ncid,'ocn_mosaic_file',vid))
@@ -187,9 +187,10 @@ deallocate(wrk_super)
 
 !topo_file='/home/datalib/bathymetry/GEBCO_2008/gebco_08_2d.nc'
 !topo_file='gebco_08_2d_rot.nc'
-topo_file='gebco_2014_rot.nc'
+!topo_file='gebco_2014_rot.nc'
+topo_file='GEBCO_2022_shifted_lon.nc'
 call handle_error(nf90_open(trim(topo_file),nf90_nowrite,ncid))
-call handle_error(nf90_inq_varid(ncid,'height',hid))
+call handle_error(nf90_inq_varid(ncid,'elevation',hid))
 call handle_error(nf90_inquire_variable(ncid,hid,dimids=dids))
 call handle_error(nf90_inquire_dimension(ncid,dids(1),xname,xlen))
 call handle_error(nf90_inquire_dimension(ncid,dids(2),yname,ylen))
@@ -234,7 +235,6 @@ call handle_error(nf90_enddef(ncid_topo))
 
 ! Do 
 do jmosaic=1,j_lat-1,jblock
-
    jm_end=min(jmosaic+jblock-1,j_lat-1)
    ystart=y_c(1,jmosaic)
    yend=y_c(1,jm_end+1)
@@ -245,8 +245,7 @@ do jmosaic=1,j_lat-1,jblock
    if(y_c(1,jm_end+1)<ytopo(jend)) jend=jend-1
 
    jcount=jend-jstart+1
-   jpoints=jm_end-jmosaic+1
-      
+   jpoints=jm_end-jmosaic+1   
 write(*,*) 'jmosaic=',jmosaic,ystart,yend,jstart,jend
 
    istart=1
